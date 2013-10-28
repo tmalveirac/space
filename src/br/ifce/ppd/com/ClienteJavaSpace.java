@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.TransactionException;
 import net.jini.space.JavaSpace;
@@ -15,6 +16,7 @@ public class ClienteJavaSpace {
     //private String cliente;
     private String nome;
     private String sala;
+    private Long numProxMensagem;
     
     public ClienteJavaSpace(){
         Lookup finder = new Lookup(JavaSpace.class);
@@ -27,14 +29,57 @@ public class ClienteJavaSpace {
     }
     
     
-    public void escreverMensagem(String sala, String origem, String Destino, String msg, boolean tipoMsg){
-        
-       
+    public void escreverMensagem(String sala, String origem, String Destino, String mensagem, Boolean tipoMsg){
+        try {
+            //Buscar número da próxima mensagem
+            SalaChat template = new SalaChat(null, sala, null); //retorna 1 sala
+            SalaChat res = (SalaChat) space.take(template, null, 1);
+            
+            Long numProxMsg = res.proxMensagemNum;
+            
+            res.incrementar();
+            
+            //De volta para o espaço com o Num atualizado
+            space.write(res, null, 10*60 * 1000);
+            
+            //Montar Msg
+            MensagemSalaChat msg = new MensagemSalaChat(numProxMsg, sala, mensagem, origem, Destino, tipoMsg);
+            space.write(msg, null, 5*60*1000);
+         
+        } catch (Exception ex) {
+            Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
+        } 
     }
     
-    public String getMensagens(String sala){
+    public Vector<String> getMensagens(String sala, Long numMsgInicial){
+        Vector<String> resultado =  new Vector<String>();
+        Long aux = numMsgInicial;
+        //Buscar mensagens
         
-        return "";
+            try {
+                MensagemSalaChat template = new MensagemSalaChat(aux, sala, null, null, null, null);
+                MensagemSalaChat msg = (MensagemSalaChat) space.read(template, null, 1);
+                
+                while (msg != null){
+                    if (!msg.privativa){
+                        resultado.add(msg.origem + " enviou: " + msg.mensagem);
+                    }
+                    else{
+                        if (msg.destino.equals(nome) || msg.origem.equals(nome)){
+                            resultado.add("**PRIV** " + msg.origem + " enviou: " + msg.mensagem + "\n");
+                        }
+                    }
+                    aux++;
+                    template = new MensagemSalaChat(aux, sala, null, null, null, null);
+                    msg = (MensagemSalaChat) space.read(template, null, 1);
+                }
+                
+                //Atualiza o cliente
+                numProxMensagem=aux;
+            } catch (Exception ex) {
+                Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
+            } 
+        return resultado;
     } 
     
     public void sairDaSala(String nome, String sala){
@@ -50,9 +95,17 @@ public class ClienteJavaSpace {
     public void entrarNaSala(String nome, String sala){
         try {
             if (proxNumeroUsuarioSalaDisponivel()!=100){
+                
                 UsuarioSalaChat usrSala = new UsuarioSalaChat(proxNumeroUsuarioSalaDisponivel(),
                     nome,sala);
                 space.write(usrSala, null, Lease.FOREVER);
+                
+                //Atualizar numProxMsg
+                SalaChat template = new SalaChat(null, sala, null);
+                SalaChat salaChat =  (SalaChat) space.read(template, null, 1);
+                
+                numProxMensagem = salaChat.proxMensagemNum;
+                
             }
             else{
                 System.err.println("Sala Lotada");
@@ -268,6 +321,14 @@ public class ClienteJavaSpace {
 
     public void setSala(String sala) {
         this.sala = sala;
+    }
+
+    public Long getNumProxMensagem() {
+        return numProxMensagem;
+    }
+
+    public void setNumProxMensagem(Long numProxMensagem) {
+        this.numProxMensagem = numProxMensagem;
     }
     
     

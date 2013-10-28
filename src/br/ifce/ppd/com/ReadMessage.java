@@ -1,5 +1,8 @@
 package br.ifce.ppd.com;
 
+import java.util.Date;
+import net.jini.core.transaction.Transaction;
+import net.jini.core.transaction.TransactionFactory;
 import net.jini.space.JavaSpace;
 
 public class ReadMessage {
@@ -18,6 +21,7 @@ public class ReadMessage {
             while (true) {
                 Message template = new Message();
                 template.content="tiago";
+                
                 Message msg = (Message) space.take(template, null, 60 * 1000);
                 if (msg == null) {
                     System.out.println("Tempo de espera esgotado. Encerrando...");

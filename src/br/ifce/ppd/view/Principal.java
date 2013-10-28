@@ -177,6 +177,32 @@ public class Principal extends javax.swing.JFrame {
             }
         }).start();
          
+        //Thread que escuta as novas mensagens da sala atual
+        flg_thread=true; 
+        new Thread(new Runnable() {
+            public void run() {           
+                while(flg_thread){
+                    for (Aba2 a : listaAbas){
+                        if(a.getSala().equals(cliente.getSala())){
+                            Vector<String> lista = cliente.getMensagens(cliente.getSala(),
+                                    cliente.getNumProxMensagem());
+                            if (lista.size()>0){
+                                for (String s : lista){
+                                    a.getJtaMensagem().append(s);
+                                }
+                                break;
+                            }
+                        }                     
+                    }                  
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }).start();
+        
         
     }//GEN-LAST:event_jbtEntrarSalaActionPerformed
 

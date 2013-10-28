@@ -25,7 +25,7 @@ public class WriteMessage {
                 }
                 Message msg = new Message();
                 msg.content = message;
-                space.write(msg, null, 60 * 1000);
+                space.write(msg, null, 60 * 1000); //1 minuto
                 
             }
         } catch (Exception e) {

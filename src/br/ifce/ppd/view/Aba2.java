@@ -197,12 +197,28 @@ public class Aba2 extends JPanel{
             String msg;
             if (jcbPrvativa.isSelected()){
                 msg = "****Nome enviou Privativamente: " + jtfMensagem.getText() + "\n";
+                
+                if (jltUsuarios.isSelectionEmpty()){
+                    JOptionPane.showMessageDialog(null, "Selecione um contato ou"
+                            + "desmarque o check Privativo!"
+                            ,"Aviso",  JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                cliente.escreverMensagem(cliente.getSala(), 
+                        cliente.getNome(), jltUsuarios.getSelectedValue().toString(), 
+                        jtfMensagem.getText(), Boolean.TRUE);
+                
             }
             else{
                 msg = "Nome enviou: " + jtfMensagem.getText() + "\n";
+                
+                //Enviar Mensagem
+                cliente.escreverMensagem(cliente.getSala(), 
+                        cliente.getNome(), null, 
+                        jtfMensagem.getText(), Boolean.FALSE);
             }
             
-            jtaMensagem.append(msg);
+            //jtaMensagem.append(msg);
 
             jtfMensagem.setText("");
         }
