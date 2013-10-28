@@ -9,6 +9,7 @@ package br.ifce.ppd.view;
 
 import javax.swing.JButton;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -29,6 +30,7 @@ public class Aba2 extends JPanel{
     private JScrollPane jScrollPane2;
     private JList jltUsuarios;
     private JPanel jPanel3;
+    private javax.swing.JCheckBox jcbPrvativa;
     
     
     public Aba2(String loginRemoto){
@@ -47,9 +49,7 @@ public class Aba2 extends JPanel{
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jtaMensagem = new javax.swing.JTextArea();
-        
-        
-
+        jcbPrvativa = new javax.swing.JCheckBox();
        
         jtaMensagem.setColumns(20);
         jtaMensagem.setRows(5);
@@ -79,8 +79,6 @@ public class Aba2 extends JPanel{
                 jbtSairSalaActionPerformed(evt);
             }
         });
-
-
         
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)), "Usuários", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
 
@@ -90,16 +88,26 @@ public class Aba2 extends JPanel{
             public Object getElementAt(int i) { return strings[i]; }
         });
         jScrollPane2.setViewportView(jltUsuarios);
+        
+        jcbPrvativa.setText("Privativa");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane2)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jcbPrvativa)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jcbPrvativa)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)), "Mensagens", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
@@ -137,7 +145,7 @@ public class Aba2 extends JPanel{
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jbtSairSala, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
+                    .addComponent(jbtSairSala, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(119, 119, 119))
         );
@@ -153,9 +161,7 @@ public class Aba2 extends JPanel{
                     .addComponent(jbtEnviar)
                     .addComponent(jbtSairSala))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        
+        );    
         
     }
     
@@ -177,24 +183,34 @@ public class Aba2 extends JPanel{
         //cliente.getInverterservice().enviarMensagem(cliente.getNome(),loginRemoto, jtfMensagem.getText());
         //jtaMensagem.append(this.cliente.getNome() + " enviou: " + jtfMensagem.getText()+ "\n");
         
-        String msg = "Nome enviou: " + jtfMensagem.getText();
-        
-        jtfMensagem.setText("");
-         
+        if (jtfMensagem.getText().length()>0){
+            
+            String msg;
+            if (jcbPrvativa.isSelected()){
+                msg = "****Nome enviou Privativamente: " + jtfMensagem.getText() + "\n";
+            }
+            else{
+                msg = "Nome enviou: " + jtfMensagem.getText() + "\n";
+            }
+            
+            jtaMensagem.append(msg);
+
+            jtfMensagem.setText("");
+        }
+        else{
+            JOptionPane.showMessageDialog(null, "Digite uma mensagem!"
+                    ,"Aviso",  JOptionPane.WARNING_MESSAGE);
+        }
+  
     }                                         
-    
-   
-   
+     
     public JTextArea getJtaMensagem() {
         return jtaMensagem;
     }
 
     public String getLoginRemoto() {
         return loginRemoto;
-    }
-    
-    
-    
+    }   
     
 }
 

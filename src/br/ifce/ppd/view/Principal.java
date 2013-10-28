@@ -107,6 +107,7 @@ public class Principal extends javax.swing.JFrame {
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jbtEntrarSalaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtEntrarSalaActionPerformed
@@ -119,12 +120,9 @@ public class Principal extends javax.swing.JFrame {
         String salaSelecionada = jltSalas.getSelectedValue().toString(); 
         
         boolean existeAba = false;
-        //Verifica se já há aba aberta
-        for (Aba2 a : listaAbas){
-            if(a.getLoginRemoto().equals(salaSelecionada)){
-                existeAba = true;
-                break;
-            }
+        
+        if (listaAbas.size()>0){
+            existeAba=true;
         }
         
          if (!existeAba){
@@ -133,7 +131,7 @@ public class Principal extends javax.swing.JFrame {
             listaAbas.add(aba);
         }
         else{
-            JOptionPane.showMessageDialog(null, "Já existe uma aba aberta com esta sala!"
+            JOptionPane.showMessageDialog(null, "Já existe uma sala aberta. Para entrar em outra sala, saia da atual!"
                     ,"Aviso",  JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_jbtEntrarSalaActionPerformed
