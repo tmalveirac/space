@@ -3,8 +3,6 @@ package br.ifce.ppd.com;
 
 import net.jini.core.entry.Entry;
 
- 
-
 public class SalaChat implements Entry{
     
     public Long chatNum;

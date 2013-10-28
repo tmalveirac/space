@@ -143,11 +143,12 @@ public class ClienteJavaSpace {
     
     
     public boolean existeUsuario(String nome){
-       UsuarioChat template = new UsuarioChat(nome);
+       System.err.println("Existe usuario "+nome);
+       UsuarioChat template = new UsuarioChat(nome, null);
        
        UsuarioChat usr = null;
         try {
-            usr = (UsuarioChat) space.read(template, null, new Long(1));
+            usr = (UsuarioChat) space.read(template, null, 1);
         } catch (Exception ex) {
             Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -161,8 +162,9 @@ public class ClienteJavaSpace {
     }
     
     public boolean adicionarUsuario(String nome){
+        System.err.println("Add usuario "+nome);
         if (!existeUsuario(nome)){
-            UsuarioChat usr = new UsuarioChat(nome);
+            UsuarioChat usr = new UsuarioChat(nome,"online");
             try {
                 space.write(usr, null, Lease.FOREVER);
             } catch (Exception ex) {
@@ -175,6 +177,32 @@ public class ClienteJavaSpace {
             return false;
         }
     }
+    
+    public boolean usuarioLogado(String nome){
+        System.err.println("UsuarioLogado "+nome);
+        UsuarioChat template = new UsuarioChat(nome, "online");
+       
+         try {
+             UsuarioChat usr = (UsuarioChat) space.readIfExists(template, null, new Long(1));
+             
+              //System.err.println("usr.nome " + usr.nome + "online " + usr.online + "usr " + usr);
+              
+             if (usr != null){
+                 System.err.println("usr nulo");
+                return true;
+            }
+            else{
+                 System.err.println("usr não nulo");
+                return false;
+             }
+         } catch (Exception ex) {
+             System.err.println("Erro usuarioLogado");
+             Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         return false;
+        
+    }
+    
 
     public String getNome() {
         return nome;
@@ -182,6 +210,40 @@ public class ClienteJavaSpace {
 
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    public void logarUsuario(String nome) {
+        System.err.println("Logou usuario "+nome);
+        UsuarioChat template = new UsuarioChat(nome,"offline");
+        try {
+            UsuarioChat u = (UsuarioChat) space.takeIfExists(template, null, 1);
+
+            //System.err.println("u.nome " + u.nome + " u.online = " + u.online);
+            
+            UsuarioChat usr = new UsuarioChat(nome,"online");
+            space.write(usr, null, Lease.FOREVER);
+
+        } catch (Exception ex) {
+            System.err.println("LogarUsuario");
+            Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+    }
+    
+    public void deslogarUsuario(String nome) {
+        System.err.println("Deslogou usuario "+nome);
+        UsuarioChat template = new UsuarioChat(nome,"online");
+        try {
+            UsuarioChat u = (UsuarioChat) space.takeIfExists(template, null, 1);
+
+            //System.err.println("u.nome " + u.nome + " u.online = " + u.online);
+            
+            UsuarioChat usr = new UsuarioChat(nome,"offline");
+            space.write(usr, null, Lease.FOREVER);
+
+        } catch (Exception ex) {
+            System.err.println("DesLogarUsuario");
+            Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
+        } 
     }
     
 }

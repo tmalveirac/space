@@ -9,8 +9,6 @@ package br.ifce.ppd.view;
 
 
 import br.ifce.ppd.com.ClienteJavaSpace;
-import java.util.ArrayList;
-import java.util.Vector;
 import javax.swing.JOptionPane;
 
 public class Login extends javax.swing.JFrame {
@@ -105,18 +103,21 @@ public class Login extends javax.swing.JFrame {
         }
         
         System.err.println(nome+" entrou!");
-       
-        if (!cliente.adicionarUsuario(nome)){
+
+         
+        //Verifica se o usuário já está logado
+        if (!cliente.usuarioLogado(nome)){
+            //Logar usuário
+            //cliente.logarUsuario(nome);
             cliente.setNome(nome);   
             this.setVisible(false);
             new Principal(cliente).setVisible(true);
         }
         else{
-            JOptionPane.showMessageDialog(null, "Usuário Existente! "
-                    ,"Aviso", JOptionPane.INFORMATION_MESSAGE);
-        }
-        
-        
+            JOptionPane.showMessageDialog(null, "Usuário Já Logado! "
+                ,"Aviso", JOptionPane.INFORMATION_MESSAGE);
+            
+        }   
     }//GEN-LAST:event_jbtEntrarActionPerformed
 
     /**
