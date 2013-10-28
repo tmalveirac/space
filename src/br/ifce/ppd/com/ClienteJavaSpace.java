@@ -143,28 +143,33 @@ public class ClienteJavaSpace {
     
     
     public boolean existeUsuario(String nome){
+        
        System.err.println("Existe usuario "+nome);
-       UsuarioChat template = new UsuarioChat(nome, null);
+       UsuarioChat template = new UsuarioChat(nome);
        
-       UsuarioChat usr = null;
         try {
-            usr = (UsuarioChat) space.read(template, null, 1);
+            UsuarioChat usr = (UsuarioChat) space.read(template, null, 1);
+            
+            if (usr != null){
+                return true;
+            }
+            else{
+                return false;
+            }
+            
         } catch (Exception ex) {
+            System.err.println("ExisteUsuario");
             Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
         }
        
-       if (usr != null){
-           return true;
-       }
-       else{
-           return false;
-       }
+        return false;
+       
     }
     
     public boolean adicionarUsuario(String nome){
         System.err.println("Add usuario "+nome);
         if (!existeUsuario(nome)){
-            UsuarioChat usr = new UsuarioChat(nome,"online");
+            UsuarioChat usr = new UsuarioChat(nome);
             try {
                 space.write(usr, null, Lease.FOREVER);
             } catch (Exception ex) {
@@ -178,32 +183,28 @@ public class ClienteJavaSpace {
         }
     }
     
-    public boolean usuarioLogado(String nome){
-        System.err.println("UsuarioLogado "+nome);
-        UsuarioChat template = new UsuarioChat(nome, "online");
-       
-         try {
-             UsuarioChat usr = (UsuarioChat) space.readIfExists(template, null, new Long(1));
+    public boolean removerUsuario(String nome){
+        System.err.println("removerUsuario "+nome);
+        
+        UsuarioChat template = new UsuarioChat(nome);
+
+        try {
+             UsuarioChat usr = (UsuarioChat) space.take(template, null, 1);
              
-              //System.err.println("usr.nome " + usr.nome + "online " + usr.online + "usr " + usr);
-              
-             if (usr != null){
-                 System.err.println("usr nulo");
+            if (usr != null){
                 return true;
             }
             else{
-                 System.err.println("usr não nulo");
                 return false;
-             }
+            }
          } catch (Exception ex) {
-             System.err.println("Erro usuarioLogado");
+             System.err.println("RemoverUsuario");
              Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
          }
-         return false;
-        
+
+        return false;
     }
     
-
     public String getNome() {
         return nome;
     }
@@ -212,38 +213,4 @@ public class ClienteJavaSpace {
         this.nome = nome;
     }
 
-    public void logarUsuario(String nome) {
-        System.err.println("Logou usuario "+nome);
-        UsuarioChat template = new UsuarioChat(nome,"offline");
-        try {
-            UsuarioChat u = (UsuarioChat) space.takeIfExists(template, null, 1);
-
-            //System.err.println("u.nome " + u.nome + " u.online = " + u.online);
-            
-            UsuarioChat usr = new UsuarioChat(nome,"online");
-            space.write(usr, null, Lease.FOREVER);
-
-        } catch (Exception ex) {
-            System.err.println("LogarUsuario");
-            Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-    }
-    
-    public void deslogarUsuario(String nome) {
-        System.err.println("Deslogou usuario "+nome);
-        UsuarioChat template = new UsuarioChat(nome,"online");
-        try {
-            UsuarioChat u = (UsuarioChat) space.takeIfExists(template, null, 1);
-
-            //System.err.println("u.nome " + u.nome + " u.online = " + u.online);
-            
-            UsuarioChat usr = new UsuarioChat(nome,"offline");
-            space.write(usr, null, Lease.FOREVER);
-
-        } catch (Exception ex) {
-            System.err.println("DesLogarUsuario");
-            Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-    }
-    
 }

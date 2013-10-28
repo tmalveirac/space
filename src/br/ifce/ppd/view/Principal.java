@@ -243,7 +243,7 @@ public class Principal extends javax.swing.JFrame {
             public void windowClosing(WindowEvent we) {
                 if (we.getID() == WindowEvent.WINDOW_CLOSING) {
                     flg_thread=false;
-                    cliente.deslogarUsuario(cliente.getNome());
+                    cliente.removerUsuario(cliente.getNome());
                     System.exit(0);
                 }
             }

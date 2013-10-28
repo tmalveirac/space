@@ -106,7 +106,7 @@ public class Login extends javax.swing.JFrame {
 
          
         //Verifica se o usuário já está logado
-        if (!cliente.usuarioLogado(nome)){
+        if (cliente.adicionarUsuario(nome)){
             //Logar usuário
             //cliente.logarUsuario(nome);
             cliente.setNome(nome);   
