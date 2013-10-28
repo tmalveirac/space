@@ -117,7 +117,7 @@ public class Login extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Usuário Já Logado! "
                 ,"Aviso", JOptionPane.INFORMATION_MESSAGE);
             
-        }   
+        }  
     }//GEN-LAST:event_jbtEntrarActionPerformed
 
     /**

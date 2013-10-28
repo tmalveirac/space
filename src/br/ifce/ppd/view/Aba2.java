@@ -7,12 +7,17 @@ package br.ifce.ppd.view;
  * 
  */
 
+import br.ifce.ppd.com.ClienteJavaSpace;
+
+import java.util.Vector;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 
 
 public class Aba2 extends JPanel{
@@ -23,7 +28,7 @@ public class Aba2 extends JPanel{
     private javax.swing.JTextArea jtaMensagem;
     private javax.swing.JTextField jtfMensagem;
     private javax.swing.JButton jbtFecharAba;
-    private String loginRemoto;
+    private String sala;
     private JPanel jPanel1;
     private JButton jbtSairSala;
     private JPanel jPanel2;
@@ -31,12 +36,14 @@ public class Aba2 extends JPanel{
     private JList jltUsuarios;
     private JPanel jPanel3;
     private javax.swing.JCheckBox jcbPrvativa;
+    private ClienteJavaSpace cliente;
+    private static DefaultListModel  listModel = new DefaultListModel();
     
     
-    public Aba2(String loginRemoto){
+    public Aba2(String sala, ClienteJavaSpace cliente){
        
-        
-        this.loginRemoto=loginRemoto;
+        this.cliente=cliente;
+        this.sala=sala;
         
         System.err.println("Aba NOVA!!");
         
@@ -58,6 +65,8 @@ public class Aba2 extends JPanel{
         jtaMensagem.setCaretPosition(jtaMensagem.getDocument().getLength());
         
         jtaMensagem.setEditable(false);
+        
+        jltUsuarios.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         
         jtfMensagem.addActionListener(new java.awt.event.ActionListener() {
@@ -82,24 +91,22 @@ public class Aba2 extends JPanel{
         
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)), "Usuários", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
 
-        jltUsuarios.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
+       
         jScrollPane2.setViewportView(jltUsuarios);
         
         jcbPrvativa.setText("Privativa");
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jcbPrvativa)
                 .addContainerGap())
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -170,6 +177,8 @@ public class Aba2 extends JPanel{
         
         getParent().remove(this);
         Principal.getListaAbas().remove(this);
+        cliente.sairDaSala(cliente.getNome(), sala);
+        
     }                                           
 
     private void jtfMensagemActionPerformed(java.awt.event.ActionEvent evt) {                                            
@@ -208,9 +217,57 @@ public class Aba2 extends JPanel{
         return jtaMensagem;
     }
 
-    public String getLoginRemoto() {
-        return loginRemoto;
+    public String getSala() {
+        return sala;
     }   
+
+    public JList getJltUsuarios() {
+        return jltUsuarios;
+    }
+
+    public void setJltUsuarios(JList jltUsuarios) {
+        this.jltUsuarios = jltUsuarios;
+    }
+    
+    
+     /**
+    * Insere um nome na lista de login do Chat
+    *             
+    * @param nome   nome a ser inserido na lista do chat
+    * @return       void
+    */
+    public void insereListaChat(Vector<String> lista){
+        //listModel.removeAllElements();
+        DefaultListModel list = new DefaultListModel();
+        for (String s : lista){
+            if (idNomeListaChat(s) == -1) {
+                list.addElement(s);
+                jltUsuarios.setModel(list);
+            }
+        }     
+    }  
+    
+    /**
+    * Identifica o id de um nome na lista do chat
+    *             
+    * @param    nome   nome a ser buscado na lista de login do chat
+    * @return   void   indice i do nome da lista, se existir. -1, caso contrário 
+    */
+    public static int idNomeListaChat(String nome){
+        try {
+            for (int i=0; i<listModel.getSize();i++){
+                if (listModel.get(i).toString().equals(nome)){
+                    return i;
+                }
+            }
+        }
+        catch (Exception e){
+            System.err.println("EXCEÇão size list " + listModel.size());
+        }
+        
+        
+        return -1;
+    }
     
 }
 

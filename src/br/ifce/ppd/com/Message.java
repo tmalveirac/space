@@ -9,4 +9,5 @@ public class Message implements Entry {
    public Message(String content){
 	this.content=content;
    }	
+   
 }

@@ -16,13 +16,16 @@ public class ReadMessage {
             System.out.println("O servico JavaSpace foi encontrado.");
 
             while (true) {
-                Message template = new Message("tiago");
+                Message template = new Message();
+                template.content="tiago";
                 Message msg = (Message) space.take(template, null, 60 * 1000);
                 if (msg == null) {
                     System.out.println("Tempo de espera esgotado. Encerrando...");
                     System.exit(0);
                 }
                 System.out.println("Mensagem recebida: "+ msg.content);
+               
+                 
             }
         } catch (Exception e) {
             e.printStackTrace();

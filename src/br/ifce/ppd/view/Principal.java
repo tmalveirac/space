@@ -123,12 +123,14 @@ public class Principal extends javax.swing.JFrame {
 
     private void jbtEntrarSalaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtEntrarSalaActionPerformed
          if (jltSalas.isSelectionEmpty()){
-            JOptionPane.showMessageDialog(null, "Selecione um contato!"
+            JOptionPane.showMessageDialog(null, "Selecione uma Sala!"
                     ,"Aviso",  JOptionPane.WARNING_MESSAGE);
             return;
         }
          
         String salaSelecionada = jltSalas.getSelectedValue().toString(); 
+        
+        System.err.println("Sala Selecionada: " + salaSelecionada);
         
         boolean existeAba = false;
         
@@ -137,21 +139,51 @@ public class Principal extends javax.swing.JFrame {
         }
         
          if (!existeAba){
-            Aba2 aba = new Aba2(salaSelecionada);
+            Aba2 aba = new Aba2(salaSelecionada, cliente);
             jtpPainelAbas.addTab(salaSelecionada,aba);
             listaAbas.add(aba);
+            cliente.setSala(salaSelecionada);
+            cliente.entrarNaSala(cliente.getNome(), salaSelecionada);
+            aba.insereListaChat(cliente.getUsuarios(cliente.getSala()));
         }
         else{
             JOptionPane.showMessageDialog(null, "Já existe uma sala aberta. Para entrar em outra sala, saia da atual!"
                     ,"Aviso",  JOptionPane.WARNING_MESSAGE);
         }
+         
+        flg_thread=true; 
+        //Thread que escuta usuários entrando na sala e popula lista
+        new Thread(new Runnable() {
+            public void run() {           
+                while(flg_thread){
+                    for (Aba2 a : listaAbas){
+                        if(a.getSala().equals(cliente.getSala())){
+                            Vector<String> lista = cliente.getUsuarios(cliente.getSala());
+                            if (lista.size()>0){
+                                a.insereListaChat(lista);
+                                break;
+                            }
+                            else{
+                                flg_thread = false;
+                            }
+                        }                     
+                    }                  
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }).start();
+         
+        
     }//GEN-LAST:event_jbtEntrarSalaActionPerformed
 
     private void jbtCriarSalaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtCriarSalaActionPerformed
         
-       
-        
-        String nomeSala = JOptionPane.showInputDialog(this, "Digite o nome da sala.", "Criar Sala", JOptionPane.OK_OPTION);
+        String nomeSala = JOptionPane.showInputDialog(this, "Digite o nome da sala.", 
+                "Criar Sala", JOptionPane.INFORMATION_MESSAGE);
         System.err.println("ADD SALA: " + nomeSala);  
         
         if (nomeSala.length()<1){
@@ -199,14 +231,15 @@ public class Principal extends javax.swing.JFrame {
     * @param nome   nome a ser inserido na lista do chat
     * @return       void
     */
-    public void insereListaChat(Vector<String> listaLogin){
+    public void insereListaChat(Vector<String> lista){
         
-        for (String s : listaLogin){
+        DefaultListModel list = new DefaultListModel();
+        for (String s : lista){
             if (idNomeListaChat(s) == -1) {
-                listModel.addElement(s);
-                jltSalas.setModel(listModel);
+                list.addElement(s);
+                jltSalas.setModel(list);
             }
-        }     
+        }        
     }  
     
     /**
@@ -274,4 +307,5 @@ public class Principal extends javax.swing.JFrame {
             }      
         });   
     }
+    
 }
