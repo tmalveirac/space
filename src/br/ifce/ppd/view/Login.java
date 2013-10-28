@@ -8,6 +8,7 @@ package br.ifce.ppd.view;
  */
 
 
+import br.ifce.ppd.com.ClienteJavaSpace;
 import java.util.ArrayList;
 import java.util.Vector;
 import javax.swing.JOptionPane;
@@ -95,20 +96,27 @@ public class Login extends javax.swing.JFrame {
 
     private void jbtEntrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtEntrarActionPerformed
         String nome = jtfLogin.getText();
-        /*
-        if (cliente.getInverterservice().usuarioJaCadastrado(nome)){
-            cliente.setNome(nome);
-            JOptionPane.showMessageDialog(null, "Usuário Já Cadastrado! "
-                    + "Clique em entrar! ","Aviso",  JOptionPane.WARNING_MESSAGE);
+        cliente = new ClienteJavaSpace();
+        
+        if (nome.length()<1){
+            JOptionPane.showMessageDialog(null, " Informe um nome!"
+                    ,"Aviso",  JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        System.err.println(nome+" entrou!");
+       
+        if (!cliente.adicionarUsuario(nome)){
+            cliente.setNome(nome);   
+            this.setVisible(false);
+            new Principal(cliente).setVisible(true);
         }
         else{
-            cliente.getInverterservice().cadastrar(nome);
-            JOptionPane.showMessageDialog(null, "Usuário Cadastrado com Sucesso! "
-                    + "Clique em entrar! ","Aviso", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Usuário Existente! "
+                    ,"Aviso", JOptionPane.INFORMATION_MESSAGE);
         }
-        * */
-        this.setVisible(false);
-        new Principal(nome).setVisible(true);
+        
+        
     }//GEN-LAST:event_jbtEntrarActionPerformed
 
     /**
@@ -151,4 +159,6 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JButton jbtSair;
     private javax.swing.JTextField jtfLogin;
     // End of variables declaration//GEN-END:variables
+    private ClienteJavaSpace cliente;
+
 }

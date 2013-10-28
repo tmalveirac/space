@@ -7,6 +7,7 @@ package br.ifce.ppd.view;
  * 
  */
 
+import br.ifce.ppd.com.ClienteJavaSpace;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Vector;
@@ -18,20 +19,19 @@ import javax.swing.ListSelectionModel;
 
 public class Principal extends javax.swing.JFrame {
 
-    public Principal(String nome) {
+    private ClienteJavaSpace cliente;
+    
+    public Principal(ClienteJavaSpace cliente) {
         initComponents();
         inicializar();
         
-        this.nome=nome;
+        this.cliente=cliente;
+        
+        setTitle(cliente.getNome());
         
         jltSalas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
-        Vector<String> lista = new Vector<String>();
-        lista.add("Sala1");
-        lista.add("Sala2");
-        insereListaChat(lista);
-        
-        
+       
+        insereListaChat(cliente.getSalas());
     }
 
     /**
@@ -47,6 +47,7 @@ public class Principal extends javax.swing.JFrame {
         jbtEntrarSala = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         jltSalas = new javax.swing.JList();
+        jbtCriarSala = new javax.swing.JButton();
         jtpPainelAbas = new javax.swing.JTabbedPane();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -65,6 +66,13 @@ public class Principal extends javax.swing.JFrame {
 
         jScrollPane3.setViewportView(jltSalas);
 
+        jbtCriarSala.setText("Criar Sala");
+        jbtCriarSala.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbtCriarSalaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -74,13 +82,16 @@ public class Principal extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jbtCriarSala, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jbtEntrarSala))
+                .addComponent(jbtEntrarSala)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                .addComponent(jbtCriarSala))
         );
 
         jMenu1.setText("File");
@@ -136,6 +147,29 @@ public class Principal extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jbtEntrarSalaActionPerformed
 
+    private void jbtCriarSalaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtCriarSalaActionPerformed
+        
+       
+        
+        String nomeSala = JOptionPane.showInputDialog(this, "Digite o nome da sala.", "Criar Sala", JOptionPane.OK_OPTION);
+        System.err.println("ADD SALA: " + nomeSala);  
+        
+        if (nomeSala.length()<1){
+            JOptionPane.showMessageDialog(null, " Informe um nome!"
+                    ,"Aviso",  JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        if (!cliente.existeSala(nomeSala)){
+            cliente.criarSala(nomeSala);
+            insereListaChat(cliente.getSalas());
+        }
+        else{
+           JOptionPane.showMessageDialog(null, "Já existe uma sala com este nome!"
+                    ,"Aviso",  JOptionPane.WARNING_MESSAGE); 
+        }
+    }//GEN-LAST:event_jbtCriarSalaActionPerformed
+
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu jMenu1;
@@ -143,6 +177,7 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JButton jbtCriarSala;
     private javax.swing.JButton jbtEntrarSala;
     private static javax.swing.JList jltSalas;
     private javax.swing.JTabbedPane jtpPainelAbas;
@@ -151,7 +186,6 @@ public class Principal extends javax.swing.JFrame {
     private static Vector<Aba2> listaAbas = new  Vector<Aba2>();
     private static DefaultListModel  listModel = new DefaultListModel();    
     private boolean flg_thread=true;
-    private String nome;
 
  
     public static Vector<Aba2> getListaAbas() {
@@ -165,7 +199,7 @@ public class Principal extends javax.swing.JFrame {
     * @param nome   nome a ser inserido na lista do chat
     * @return       void
     */
-    public  void insereListaChat(Vector<String> listaLogin){
+    public void insereListaChat(Vector<String> listaLogin){
         
         for (String s : listaLogin){
             if (idNomeListaChat(s) == -1) {
