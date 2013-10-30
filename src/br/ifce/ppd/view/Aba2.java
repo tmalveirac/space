@@ -253,12 +253,24 @@ public class Aba2 extends JPanel{
     * @return       void
     */
     public void insereListaChat(Vector<String> lista){
-        //listModel.removeAllElements();
+
+        String selecionado = null;
+        
+         //Guarda o selecionado
+        if (!jltUsuarios.isSelectionEmpty()){
+             selecionado = jltUsuarios.getSelectedValue().toString();
+        }
+
         DefaultListModel list = new DefaultListModel();
         for (String s : lista){
                 list.addElement(s);          
         }     
+        
         jltUsuarios.setModel(list); 
+        
+        if (selecionado != null){
+            jltUsuarios.setSelectedValue(selecionado, true);
+        }
     }  
     
     /**

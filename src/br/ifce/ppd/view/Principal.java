@@ -21,7 +21,7 @@ public class Principal extends javax.swing.JFrame {
 
     private ClienteJavaSpace cliente;
     
-    public Principal(ClienteJavaSpace cliente) {
+    public Principal(final ClienteJavaSpace cliente) {
         initComponents();
         inicializar();
         
@@ -32,6 +32,23 @@ public class Principal extends javax.swing.JFrame {
         jltSalas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
        
         insereListaChat(cliente.getSalas());
+        
+        flg_thread_sala=true; 
+        //Thread que escuta as salas criadas e popula lista
+        new Thread(new Runnable() {
+            public void run() {           
+                while(flg_thread_sala){
+                    insereListaChat(cliente.getSalas());           
+                    //atualizaListaChat(cliente.getSalas());
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }).start(); 
+        
     }
 
     /**
@@ -159,22 +176,6 @@ public class Principal extends javax.swing.JFrame {
                     ,"Aviso",  JOptionPane.WARNING_MESSAGE);
         }
          
-         flg_thread_sala=true; 
-        //Thread que escuta as salas criadas e popula lista
-        new Thread(new Runnable() {
-            public void run() {           
-                while(flg_thread_sala){
-                    insereListaChat(cliente.getSalas());           
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        }).start(); 
-         
-         
         flg_thread=true; 
         //Thread que escuta usuários entrando na sala e popula lista
         new Thread(new Runnable() {
@@ -193,7 +194,7 @@ public class Principal extends javax.swing.JFrame {
                         }                     
                     }                  
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(3000);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -291,12 +292,29 @@ public class Principal extends javax.swing.JFrame {
     */
     public void insereListaChat(Vector<String> lista){
         
+        String selecionado = null;
+        
+        //Guarda o selecionado
+        if (!jltSalas.isSelectionEmpty()){
+             selecionado = jltSalas.getSelectedValue().toString();
+        }
+        
+        
         DefaultListModel list = new DefaultListModel();
         for (String s : lista){
             list.addElement(s);
-        }        
-         jltSalas.setModel(list);
+        }       
+                
+        jltSalas.setModel(list);
+        
+        if (selecionado != null){
+            jltSalas.setSelectedValue(selecionado, true);
+        }
+        
+    
     }  
+    
+    
     
     /**
     * Identifica o id de um nome na lista do chat
@@ -334,6 +352,12 @@ public class Principal extends javax.swing.JFrame {
                     flg_thread=false;
                     flg_thread_sala=false;
                     cliente.removerUsuario(cliente.getNome());
+                    
+                    //Se existe sala aberta, sai da sala
+                    if (cliente.getSala() != null){
+                        cliente.sairDaSala(cliente.getNome(), cliente.getSala());
+                    }
+                    
                     System.exit(0);
                 }
             }
