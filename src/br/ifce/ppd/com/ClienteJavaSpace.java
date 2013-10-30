@@ -1,31 +1,36 @@
 
 package br.ifce.ppd.com;
 
-import java.rmi.RemoteException;
+import br.ifce.ppd.view.Principal;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
-import net.jini.core.transaction.TransactionException;
 import net.jini.space.JavaSpace;
 
 public class ClienteJavaSpace {
     
     private JavaSpace space;
-    //private String cliente;
     private String nome;
     private String sala;
     private Long numProxMensagem;
     
     public ClienteJavaSpace(){
-        Lookup finder = new Lookup(JavaSpace.class);
-        space = (JavaSpace) finder.getService();
-         
-        if (space == null) {
-                   System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
-                   System.exit(-1);
+        try{
+            Lookup finder = new Lookup(JavaSpace.class);
+            space = (JavaSpace) finder.getService();
+
+            if (space == null) {
+                       System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
+                       System.exit(-1);
+            }
         }
+        catch(Exception e){
+            Principal.encerrar();
+            System.err.println("Seviço Fora do Ar!");
+            System.exit(-1);
+        }
+        
     }
     
     
@@ -40,13 +45,14 @@ public class ClienteJavaSpace {
             res.incrementar();
             
             //De volta para o espaço com o Num atualizado
-            space.write(res, null, 10*60 * 1000);
+            space.write(res, null, 10*60*1000);
             
             //Montar Msg
             MensagemSalaChat msg = new MensagemSalaChat(numProxMsg, sala, mensagem, origem, Destino, tipoMsg);
             space.write(msg, null, 5*60*1000);
          
         } catch (Exception ex) {
+            Principal.encerrar();
             Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
         } 
     }
@@ -62,7 +68,7 @@ public class ClienteJavaSpace {
                 
                 while (msg != null){
                     if (!msg.privativa){
-                        resultado.add(msg.origem + " enviou: " + msg.mensagem);
+                        resultado.add(msg.origem + " enviou: " + msg.mensagem + "\n");
                     }
                     else{
                         if (msg.destino.equals(nome) || msg.origem.equals(nome)){
@@ -77,6 +83,7 @@ public class ClienteJavaSpace {
                 //Atualiza o cliente
                 numProxMensagem=aux;
             } catch (Exception ex) {
+                Principal.encerrar();
                 Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
             } 
         return resultado;
@@ -87,14 +94,32 @@ public class ClienteJavaSpace {
             UsuarioSalaChat template = new UsuarioSalaChat(null,nome,sala);
             space.take(template, null, 1);
             this.sala=null;
+            
+            //Verifica se a sala ficou vazia. Caso sim, seta TIME_OUT
+            if (getUsuarios(sala).isEmpty()){
+                SalaChat template1 = new SalaChat(null, sala, null); //retorna 1 sala
+                SalaChat res = (SalaChat) space.take(template1, null, 1);
+
+                space.write(res, null, 10*60*1000);
+            }
+            
         } catch (Exception ex) {
+            Principal.encerrar();
             Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
         } 
     }
     
     public void entrarNaSala(String nome, String sala){
         try {
-            if (proxNumeroUsuarioSalaDisponivel()!=100){
+            if (proxNumeroUsuarioSalaDisponivel()!=SpaceChatLimites.SALA_LOTADA){
+               
+                //Veirifica se a sala está inicialmente vazia. Caso Sim, retira TIME_OUT da Sala
+                if (getUsuarios(sala).isEmpty()){
+                    SalaChat template1 = new SalaChat(null, sala, null); //retorna 1 sala
+                    SalaChat res = (SalaChat) space.take(template1, null, 1);
+                
+                    space.write(res, null, Lease.FOREVER);
+                }
                 
                 UsuarioSalaChat usrSala = new UsuarioSalaChat(proxNumeroUsuarioSalaDisponivel(),
                     nome,sala);
@@ -112,12 +137,13 @@ public class ClienteJavaSpace {
             }
             
         } catch (Exception ex) {
+            Principal.encerrar();
             Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
         } 
     }
     
     public Long proxNumeroUsuarioSalaDisponivel(){
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < SpaceChatLimites.NUM_MAX_USER_POR_SALA; i++) {
              UsuarioSalaChat template = new UsuarioSalaChat(new Long(i),null, null);
             try {
                 UsuarioSalaChat msg = (UsuarioSalaChat) space.read(template, null, 1);
@@ -125,11 +151,12 @@ public class ClienteJavaSpace {
                     return new Long(i);
                 }           
             } catch (Exception ex) {
+                Principal.encerrar();
                 System.err.println("proxNumeroUsuarioSalaDisponivel");
                 Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
             }
         }       
-        return new Long(100); //100 indica que não é possível criar salas
+        return new Long(SpaceChatLimites.SALA_LOTADA); //100 indica que não é possível criar salas
     }
     
     public Vector<String> getUsuarios(String sala){
@@ -141,7 +168,7 @@ public class ClienteJavaSpace {
         
         Vector<String> listaUsuarios = new Vector<String>();
         
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < SpaceChatLimites.NUM_MAX_USER_POR_SALA; i++) {
             UsuarioSalaChat template = new UsuarioSalaChat(new Long(i),null,sala);
             try {
                 UsuarioSalaChat msg = (UsuarioSalaChat) space.read(template, null, 1);
@@ -150,6 +177,7 @@ public class ClienteJavaSpace {
                     listaUsuarios.add(msg.nome);
                 }       
             } catch (Exception ex) {
+                Principal.encerrar();
                 System.err.println("getUsuarios");
                 Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -163,7 +191,7 @@ public class ClienteJavaSpace {
         Vector<String> listaSalas = new Vector<String>();
         
         //Ler as 10 primeiras salas
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < SpaceChatLimites.NUM_MAX_SALAS; i++) {
              SalaChat template = new SalaChat(new Long(i),null, null);
             try {
                 SalaChat msg = (SalaChat) space.read(template, null, 1);
@@ -171,6 +199,7 @@ public class ClienteJavaSpace {
                     listaSalas.add(msg.chatNome);
                 }       
             } catch (Exception ex) {
+                Principal.encerrar();
                 System.err.println("getSalas");
                 Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -183,11 +212,12 @@ public class ClienteJavaSpace {
     
     public int criarSala(String nome){      
         if (!existeSala(nome)){
-            if (proxNumeroSalaDisponivel() != 100){
+            if (proxNumeroSalaDisponivel() != SpaceChatLimites.NUM_SALA_LOTADO){
                 try {
                     SalaChat sala = new SalaChat(proxNumeroSalaDisponivel(), nome, new Long(0));
-                    space.write(sala, null, 10*60 * 1000);
+                    space.write(sala, null, 10*60*1000);
                 } catch (Exception ex) {
+                    Principal.encerrar();
                     System.err.println("CriarSala");
                     Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
                 }            
@@ -206,7 +236,7 @@ public class ClienteJavaSpace {
     
     public boolean existeSala(String nome){
         //Ler as 10 primeiras salas
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < SpaceChatLimites.NUM_MAX_SALAS; i++) {
              SalaChat template = new SalaChat(new Long(i),null, null);
             try {
                 SalaChat msg = (SalaChat) space.read(template, null, 1);
@@ -216,6 +246,7 @@ public class ClienteJavaSpace {
                 
                 
             } catch (Exception ex) {
+                Principal.encerrar();
                 System.err.println("ExisteSala");
                 Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -225,7 +256,7 @@ public class ClienteJavaSpace {
     }
     
     public Long proxNumeroSalaDisponivel(){
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < SpaceChatLimites.NUM_MAX_SALAS; i++) {
              SalaChat template = new SalaChat(new Long(i),null, null);
             try {
                 SalaChat msg = (SalaChat) space.read(template, null, 1);
@@ -233,11 +264,12 @@ public class ClienteJavaSpace {
                     return new Long(i);
                 }           
             } catch (Exception ex) {
+                Principal.encerrar();
                 System.err.println("proxNumeroSalaDisponivel");
                 Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
             }
         }       
-        return new Long(100); //100 indica que não é possível criar salas
+        return new Long(SpaceChatLimites.NUM_SALA_LOTADO); //100 indica que não é possível criar salas
     }
     
     
@@ -258,6 +290,7 @@ public class ClienteJavaSpace {
             }
             
         } catch (Exception ex) {
+            Principal.encerrar();
             System.err.println("ExisteUsuario");
             Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -274,6 +307,7 @@ public class ClienteJavaSpace {
             try {
                 space.write(usr, null, Lease.FOREVER);
             } catch (Exception ex) {
+                Principal.encerrar();
                 System.err.println("AdicionarUsuario");
                 Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
             } 
@@ -300,6 +334,7 @@ public class ClienteJavaSpace {
                 return false;
             }
          } catch (Exception ex) {
+             Principal.encerrar();
              System.err.println("RemoverUsuario");
              Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
          }
@@ -330,7 +365,5 @@ public class ClienteJavaSpace {
     public void setNumProxMensagem(Long numProxMensagem) {
         this.numProxMensagem = numProxMensagem;
     }
-    
-    
 
 }

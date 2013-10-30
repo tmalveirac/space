@@ -151,6 +151,22 @@ public class Principal extends javax.swing.JFrame {
                     ,"Aviso",  JOptionPane.WARNING_MESSAGE);
         }
          
+         flg_thread_sala=true; 
+        //Thread que escuta as salas criadas e popula lista
+        new Thread(new Runnable() {
+            public void run() {           
+                while(flg_thread_sala){
+                    insereListaChat(cliente.getSalas());           
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }).start(); 
+         
+         
         flg_thread=true; 
         //Thread que escuta usuários entrando na sala e popula lista
         new Thread(new Runnable() {
@@ -244,6 +260,7 @@ public class Principal extends javax.swing.JFrame {
     private static Vector<Aba2> listaAbas = new  Vector<Aba2>();
     private static DefaultListModel  listModel = new DefaultListModel();    
     private boolean flg_thread=true;
+    private boolean flg_thread_sala=true;
 
  
     public static Vector<Aba2> getListaAbas() {
@@ -261,11 +278,9 @@ public class Principal extends javax.swing.JFrame {
         
         DefaultListModel list = new DefaultListModel();
         for (String s : lista){
-            if (idNomeListaChat(s) == -1) {
-                list.addElement(s);
-                jltSalas.setModel(list);
-            }
+            list.addElement(s);
         }        
+         jltSalas.setModel(list);
     }  
     
     /**
@@ -302,6 +317,7 @@ public class Principal extends javax.swing.JFrame {
             public void windowClosing(WindowEvent we) {
                 if (we.getID() == WindowEvent.WINDOW_CLOSING) {
                     flg_thread=false;
+                    flg_thread_sala=false;
                     cliente.removerUsuario(cliente.getNome());
                     System.exit(0);
                 }
@@ -332,6 +348,12 @@ public class Principal extends javax.swing.JFrame {
                 //To change body of generated methods, choose Tools | Templates.
             }      
         });   
+    }
+    
+    public static void encerrar(){
+        JOptionPane.showMessageDialog(null, " A conexão foi perdida. A aplicação será encerrada!"
+                    ,"Aviso",  JOptionPane.WARNING_MESSAGE);
+            System.exit(-1);
     }
     
 }

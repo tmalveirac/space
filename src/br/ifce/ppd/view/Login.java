@@ -9,6 +9,8 @@ package br.ifce.ppd.view;
 
 
 import br.ifce.ppd.com.ClienteJavaSpace;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 public class Login extends javax.swing.JFrame {
@@ -93,8 +95,8 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_jbtSairActionPerformed
 
     private void jbtEntrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtEntrarActionPerformed
-        String nome = jtfLogin.getText();
-        cliente = new ClienteJavaSpace();
+        String nome = jtfLogin.getText().trim();
+        //cliente = new ClienteJavaSpace();
         
         if (nome.length()<1){
             JOptionPane.showMessageDialog(null, " Informe um nome!"
@@ -102,8 +104,44 @@ public class Login extends javax.swing.JFrame {
             return;
         }
         
+        //TESTE THREAD
+        flg_thread=true; 
+        //Thread que escuta as salas criadas e popula lista
+        new Thread(new Runnable() {
+            public void run() {           
+                while(flg_thread){
+                   cliente = new ClienteJavaSpace();  
+                   flg_thread=false;
+                }
+            }
+        }).start(); 
+        
+        
+        //Aguarda Conectar
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        //Aguarda Thread conectar o cliente
+        while (flg_thread){
+            Object[] options = { "Tentar Novamente!", "Encerrar!" };  
+            int n = JOptionPane.showOptionDialog(null,  
+                "Não foi possível conectar ao servidor ",  
+                "Aviso", JOptionPane.YES_NO_OPTION,  
+                JOptionPane.WARNING_MESSAGE, null, options, options[0]);  
+            System.err.println("n=" + n);
+            
+            if (n==1){
+                System.exit(0);
+            }              
+        }
+            
+        
         System.err.println(nome+" entrou!");
 
+        
          
         //Verifica se o usuário já está logado
         if (cliente.adicionarUsuario(nome)){
@@ -161,5 +199,6 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JTextField jtfLogin;
     // End of variables declaration//GEN-END:variables
     private ClienteJavaSpace cliente;
+    private boolean flg_thread=true;
 
 }

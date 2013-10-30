@@ -1,8 +1,5 @@
 package br.ifce.ppd.com;
 
-import java.util.Date;
-import net.jini.core.transaction.Transaction;
-import net.jini.core.transaction.TransactionFactory;
 import net.jini.space.JavaSpace;
 
 public class ReadMessage {

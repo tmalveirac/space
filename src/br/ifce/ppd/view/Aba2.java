@@ -200,7 +200,7 @@ public class Aba2 extends JPanel{
                 
                 if (jltUsuarios.isSelectionEmpty()){
                     JOptionPane.showMessageDialog(null, "Selecione um contato ou"
-                            + "desmarque o check Privativo!"
+                            + " desmarque o check Privativo!"
                             ,"Aviso",  JOptionPane.WARNING_MESSAGE);
                     return;
                 }
@@ -256,11 +256,9 @@ public class Aba2 extends JPanel{
         //listModel.removeAllElements();
         DefaultListModel list = new DefaultListModel();
         for (String s : lista){
-            if (idNomeListaChat(s) == -1) {
-                list.addElement(s);
-                jltUsuarios.setModel(list);
-            }
+                list.addElement(s);          
         }     
+        jltUsuarios.setModel(list); 
     }  
     
     /**
