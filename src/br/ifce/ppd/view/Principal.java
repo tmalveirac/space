@@ -142,8 +142,16 @@ public class Principal extends javax.swing.JFrame {
             Aba2 aba = new Aba2(salaSelecionada, cliente);
             jtpPainelAbas.addTab(salaSelecionada,aba);
             listaAbas.add(aba);
+            
+            
+            if(!cliente.entrarNaSala(cliente.getNome(), salaSelecionada)){
+                JOptionPane.showMessageDialog(null, "Sala lotada! Escolha outra sala!"
+                    ,"Aviso",  JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            
             cliente.setSala(salaSelecionada);
-            cliente.entrarNaSala(cliente.getNome(), salaSelecionada);
+            
             aba.insereListaChat(cliente.getUsuarios(cliente.getSala()));
         }
         else{
@@ -235,7 +243,14 @@ public class Principal extends javax.swing.JFrame {
         }
         
         if (!cliente.existeSala(nomeSala)){
-            cliente.criarSala(nomeSala);
+            int res = cliente.criarSala(nomeSala);
+            
+            if (res==2){
+                JOptionPane.showMessageDialog(null, "O limite de salas foi alcançado!"
+                    ,"Aviso",  JOptionPane.WARNING_MESSAGE); 
+                return;
+            }
+            
             insereListaChat(cliente.getSalas());
         }
         else{

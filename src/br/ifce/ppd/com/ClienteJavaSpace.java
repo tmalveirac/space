@@ -149,9 +149,9 @@ public class ClienteJavaSpace {
     * @param    nome            nome do usuário
     * @param    sala            sala do chat
     * 
-    * @return   void   
+    * @return   boolean         true, se OK. False, se limite alcançado   
     */
-    public void entrarNaSala(String nome, String sala){
+    public boolean entrarNaSala(String nome, String sala){
         try {
             if (proxNumeroUsuarioSalaDisponivel()!=SpaceChatLimites.SALA_LOTADA){
                
@@ -176,12 +176,14 @@ public class ClienteJavaSpace {
             }
             else{
                 System.err.println("Sala Lotada");
+                return false;
             }
-            
+            return true;
         } catch (Exception ex) {
             Principal.encerrar();
             Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
         } 
+        return true;
     }
     
     /**
