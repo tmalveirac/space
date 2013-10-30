@@ -1,5 +1,11 @@
-
 package br.ifce.ppd.com;
+
+/**
+ * Classe: SalaChat.java
+ * Definição da tupla de salas
+ * @author Tiago Malveira
+ * 
+ */
 
 import net.jini.core.entry.Entry;
 

@@ -1,5 +1,11 @@
-
 package br.ifce.ppd.com;
+
+/**
+ * Classe: ClienteJavaSpace.java
+ * cliente JavaSpace, responsável pela comunicação
+ * @author Tiago Malveira
+ * 
+ */
 
 import br.ifce.ppd.view.Principal;
 import java.util.Vector;
@@ -15,14 +21,16 @@ public class ClienteJavaSpace {
     private String sala;
     private Long numProxMensagem;
     
+    //Contrutor
     public ClienteJavaSpace(){
         try{
+            //Pesquisa serviço JavaSpace
             Lookup finder = new Lookup(JavaSpace.class);
             space = (JavaSpace) finder.getService();
 
             if (space == null) {
-                       System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
-                       System.exit(-1);
+                System.out.println("O servico JavaSpace nao foi encontrado. Encerrando...");
+                System.exit(-1);
             }
         }
         catch(Exception e){
@@ -33,8 +41,18 @@ public class ClienteJavaSpace {
         
     }
     
-    
-    public void escreverMensagem(String sala, String origem, String Destino, String mensagem, Boolean tipoMsg){
+    /**
+    * Escreve uma mensagem no chat
+    *             
+    * @param    sala        sala do chat
+    * @param    origem      remetente
+    * @param    destino     destinatário
+    * @param    mensagem    mensagem a ser enviada
+    * @param    tipoMsg     tipo da Mensagem (Privativa ou não)
+    * 
+    * @return   void   
+    */
+    public void escreverMensagem(String sala, String origem, String destino, String mensagem, Boolean tipoMsg){
         try {
             //Buscar número da próxima mensagem
             SalaChat template = new SalaChat(null, sala, null); //retorna 1 sala
@@ -48,7 +66,7 @@ public class ClienteJavaSpace {
             space.write(res, null, 10*60*1000);
             
             //Montar Msg
-            MensagemSalaChat msg = new MensagemSalaChat(numProxMsg, sala, mensagem, origem, Destino, tipoMsg);
+            MensagemSalaChat msg = new MensagemSalaChat(numProxMsg, sala, mensagem, origem, destino, tipoMsg);
             space.write(msg, null, 5*60*1000);
          
         } catch (Exception ex) {
@@ -57,38 +75,54 @@ public class ClienteJavaSpace {
         } 
     }
     
+    /**
+    * Recupera as mensagens do chat
+    *             
+    * @param    sala            sala do chat
+    * @param    numMsgInicial   id inicial da mensagem a ser buscada
+    * 
+    * @return   void   
+    */
     public Vector<String> getMensagens(String sala, Long numMsgInicial){
         Vector<String> resultado =  new Vector<String>();
         Long aux = numMsgInicial;
-        //Buscar mensagens
-        
-            try {
-                MensagemSalaChat template = new MensagemSalaChat(aux, sala, null, null, null, null);
-                MensagemSalaChat msg = (MensagemSalaChat) space.read(template, null, 1);
-                
-                while (msg != null){
-                    if (!msg.privativa){
-                        resultado.add(msg.origem + " enviou: " + msg.mensagem + "\n");
-                    }
-                    else{
-                        if (msg.destino.equals(nome) || msg.origem.equals(nome)){
-                            resultado.add("**PRIV** " + msg.origem + " enviou: " + msg.mensagem + "\n");
-                        }
-                    }
-                    aux++;
-                    template = new MensagemSalaChat(aux, sala, null, null, null, null);
-                    msg = (MensagemSalaChat) space.read(template, null, 1);
+       
+        //Busca mensagem
+        try {
+            MensagemSalaChat template = new MensagemSalaChat(aux, sala, null, null, null, null);
+            MensagemSalaChat msg = (MensagemSalaChat) space.read(template, null, 1);
+
+            while (msg != null){
+                if (!msg.privativa){
+                    resultado.add(msg.origem + " enviou: " + msg.mensagem + "\n");
                 }
+                else{
+                    if (msg.destino.equals(nome) || msg.origem.equals(nome)){
+                        resultado.add("**PRIV** " + msg.origem + " enviou: " + msg.mensagem + "\n");
+                    }
+                }
+                aux++;
+                template = new MensagemSalaChat(aux, sala, null, null, null, null);
+                msg = (MensagemSalaChat) space.read(template, null, 1);
+            }
                 
-                //Atualiza o cliente
-                numProxMensagem=aux;
-            } catch (Exception ex) {
-                Principal.encerrar();
-                Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
-            } 
+            //Atualiza o cliente com o num da próxima mensagem
+            numProxMensagem=aux;
+        } catch (Exception ex) {
+            Principal.encerrar();
+            Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
+        } 
         return resultado;
     } 
     
+    /**
+    * Sai da sala 
+    *             
+    * @param    nome   nome do usuário
+    * @param    sala   sala do chat
+    * 
+    * @return   void   
+    */
     public void sairDaSala(String nome, String sala){
         try {
             UsuarioSalaChat template = new UsuarioSalaChat(null,nome,sala);
@@ -100,7 +134,7 @@ public class ClienteJavaSpace {
                 SalaChat template1 = new SalaChat(null, sala, null); //retorna 1 sala
                 SalaChat res = (SalaChat) space.take(template1, null, 1);
 
-                space.write(res, null, 10*60*1000);
+                space.write(res, null, 10*60*1000); //10 minutos
             }
             
         } catch (Exception ex) {
@@ -109,6 +143,14 @@ public class ClienteJavaSpace {
         } 
     }
     
+    /**
+    * Entra em uma sala
+    *             
+    * @param    nome            nome do usuário
+    * @param    sala            sala do chat
+    * 
+    * @return   void   
+    */
     public void entrarNaSala(String nome, String sala){
         try {
             if (proxNumeroUsuarioSalaDisponivel()!=SpaceChatLimites.SALA_LOTADA){
@@ -142,6 +184,12 @@ public class ClienteJavaSpace {
         } 
     }
     
+    /**
+    * Recupera as próximo número do usuário na sala 
+    *             
+    * 
+    * @return   Long    O número da Sala   
+    */
     public Long proxNumeroUsuarioSalaDisponivel(){
         for (int i = 0; i < SpaceChatLimites.NUM_MAX_USER_POR_SALA; i++) {
              UsuarioSalaChat template = new UsuarioSalaChat(new Long(i),null, null);
@@ -159,6 +207,13 @@ public class ClienteJavaSpace {
         return new Long(SpaceChatLimites.SALA_LOTADA); //100 indica que não é possível criar salas
     }
     
+    /**
+    * Recupera as usuários do chat
+    *             
+    * @param    sala            sala do chat
+    * 
+    * @return   Vector<String>  lista de usuários   
+    */
     public Vector<String> getUsuarios(String sala){
         
         if (sala == null){
@@ -173,7 +228,6 @@ public class ClienteJavaSpace {
             try {
                 UsuarioSalaChat msg = (UsuarioSalaChat) space.read(template, null, 1);
                 if (msg != null){
-                    //System.err.println("Add nome na lista de usuarios " + msg.nome);
                     listaUsuarios.add(msg.nome);
                 }       
             } catch (Exception ex) {
@@ -182,10 +236,15 @@ public class ClienteJavaSpace {
                 Logger.getLogger(ClienteJavaSpace.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        //System.err.println("Size listaUsuarios " + listaUsuarios.size());
         return listaUsuarios;
     }
     
+    /**
+    * Recupera as salas do chat
+    *             
+    * 
+    * @return   Vector<String>  lista de salas   
+    */
     public Vector<String> getSalas(){
         
         Vector<String> listaSalas = new Vector<String>();
@@ -210,6 +269,13 @@ public class ClienteJavaSpace {
     }
     
     
+    /**
+    * Cria uma sala no Chat
+    *             
+    * @param    nome            nome da sala
+    * 
+    * @return   int             o, se OK. 1, se a sala já existe. 2 se o número máx de sala foi alcançado   
+    */
     public int criarSala(String nome){      
         if (!existeSala(nome)){
             if (proxNumeroSalaDisponivel() != SpaceChatLimites.NUM_SALA_LOTADO){
@@ -233,7 +299,13 @@ public class ClienteJavaSpace {
         return 0;
     }
     
-    
+    /**
+    * Verifica se existe uma determinada sala
+    *             
+    * @param    nome            nome da sala do chat
+    * 
+    * @return   boolean         true, se existe. False, cc.   
+    */
     public boolean existeSala(String nome){
         //Ler as 10 primeiras salas
         for (int i = 0; i < SpaceChatLimites.NUM_MAX_SALAS; i++) {
@@ -255,6 +327,12 @@ public class ClienteJavaSpace {
         return false;
     }
     
+    /**
+    * Recupera o próximo número de sala Disponível
+    *             
+    * 
+    * @return   Long    número da sala   
+    */
     public Long proxNumeroSalaDisponivel(){
         for (int i = 0; i < SpaceChatLimites.NUM_MAX_SALAS; i++) {
              SalaChat template = new SalaChat(new Long(i),null, null);
@@ -272,7 +350,13 @@ public class ClienteJavaSpace {
         return new Long(SpaceChatLimites.NUM_SALA_LOTADO); //100 indica que não é possível criar salas
     }
     
-    
+    /**
+    * Verifica se existe um determinado usuário no Chat
+    *             
+    * @param    nome            nome do usuário
+    * 
+    * @return   boolean         true, se existe. False, cc.   
+    */
     public boolean existeUsuario(String nome){
         
        System.err.println("Existe usuario "+nome);
@@ -299,6 +383,13 @@ public class ClienteJavaSpace {
        
     }
     
+    /**
+    * Adiciona um usuário no chat
+    *             
+    * @param    sala            nome do usuario
+    * 
+    * @return   boolean         true, se foi add. False, cc.   
+    */
     public boolean adicionarUsuario(String nome){
         System.err.println("Add usuario "+nome);
         if (!existeUsuario(nome)){
@@ -318,6 +409,13 @@ public class ClienteJavaSpace {
         }
     }
     
+    /**
+    * Remove um usuário do chat
+    *             
+    * @param    nome            nome do usuário
+    * 
+    * @return   boolean         true, se foi removido. False, cc.   
+    */
     public boolean removerUsuario(String nome){
         System.err.println("removerUsuario "+nome);
         

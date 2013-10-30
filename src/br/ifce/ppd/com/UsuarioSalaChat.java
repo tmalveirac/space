@@ -1,15 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.ifce.ppd.com;
+
+/**
+ * Classe: UsuarioSalaChat.java
+ * Definição da tupla de Usuários por sala
+ * @author Tiago Malveira
+ * 
+ */
 
 import net.jini.core.entry.Entry;
 
-/**
- *
- * @author malveira
- */
+
 public class UsuarioSalaChat implements Entry{
     public Long id;
     public String nome;

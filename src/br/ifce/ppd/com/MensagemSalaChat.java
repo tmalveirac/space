@@ -1,5 +1,12 @@
 package br.ifce.ppd.com;
 
+/**
+ * Classe: MensagemSalaChat.java
+ * Definição da tupla de mensagens
+ * @author Tiago Malveira
+ * 
+ */
+
 import net.jini.core.entry.Entry;
 
 public class MensagemSalaChat implements Entry{

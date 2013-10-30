@@ -1,5 +1,10 @@
 package br.ifce.ppd.com;
 
+/**
+ * Classe: Lookup.java
+ * @author Tiago Malveira
+ * 
+ */
 
 import java.io.IOException;
 

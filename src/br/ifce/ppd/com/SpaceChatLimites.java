@@ -1,5 +1,12 @@
 package br.ifce.ppd.com;
 
+/**
+ * Classe: SpaceChatLimites.java
+ * Definição de constantes de limitação da aplicação
+ * @author Tiago Malveira
+ * 
+ */
+
 public class SpaceChatLimites {
     
     //O valores são definidos em tempo de compilação!
