@@ -192,7 +192,7 @@ public class Aba2 extends JPanel{
         //cliente.getInverterservice().enviarMensagem(cliente.getNome(),loginRemoto, jtfMensagem.getText());
         //jtaMensagem.append(this.cliente.getNome() + " enviou: " + jtfMensagem.getText()+ "\n");
         
-        if (jtfMensagem.getText().length()>0){
+        if (jtfMensagem.getText().trim().length()>0){
             
             String msg;
             if (jcbPrvativa.isSelected()){
@@ -204,6 +204,14 @@ public class Aba2 extends JPanel{
                             ,"Aviso",  JOptionPane.WARNING_MESSAGE);
                     return;
                 }
+                
+                if (jltUsuarios.getSelectedValue().toString().equals(cliente.getNome())){
+                    JOptionPane.showMessageDialog(null, "Você não pode enviar privativamente para você mesmo!"
+                            + " Escolha outro contato ou desmarque o check Privativo!"
+                            ,"Aviso",  JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                
                 cliente.escreverMensagem(cliente.getSala(), 
                         cliente.getNome(), jltUsuarios.getSelectedValue().toString(), 
                         jtfMensagem.getText(), Boolean.TRUE);

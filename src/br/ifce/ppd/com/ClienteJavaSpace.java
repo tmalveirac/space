@@ -98,7 +98,8 @@ public class ClienteJavaSpace {
                 }
                 else{
                     if (msg.destino.equals(nome) || msg.origem.equals(nome)){
-                        resultado.add("**PRIV** " + msg.origem + " enviou: " + msg.mensagem + "\n");
+                        resultado.add("**PRIV** " + msg.origem + " enviou para " +
+                                msg.destino + ": " + msg.mensagem + "\n");
                     }
                 }
                 aux++;

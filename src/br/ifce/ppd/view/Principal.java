@@ -39,7 +39,6 @@ public class Principal extends javax.swing.JFrame {
             public void run() {           
                 while(flg_thread_sala){
                     insereListaChat(cliente.getSalas());           
-                    //atualizaListaChat(cliente.getSalas());
                     try {
                         Thread.sleep(3000);
                     } catch (InterruptedException ex) {
